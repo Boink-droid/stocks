@@ -1,13 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" >
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cozy Stocks Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cozy Stocks Game with Charts</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    body { font-family: monospace; }
-    .mythic { color: #f87171; animation: pulse 2s infinite; }
+    body {
+      font-family: monospace;
+    }
+    .mythic {
+      color: #f87171;
+      animation: pulse 2s infinite;
+    }
+    /* Tiny canvas style so charts fit nicely */
+    .stock-chart {
+      max-width: 100%;
+      height: 60px;
+    }
   </style>
 </head>
 <body class="bg-gradient-to-br from-sky-900 to-purple-900 text-white p-4">
@@ -48,6 +60,10 @@
     let prices = {};
     let portfolio = { cash: 1000, holdings: {} };
 
+    // Track price history for charts (last 5 days per stock)
+    const priceHistory = {};
+    stocks.forEach(stock => priceHistory[stock.name] = []);
+
     function getRandomDayName() {
       const roll = Math.random();
       let rarity = "common";
@@ -71,11 +87,16 @@
       updatePrices();
       renderStocks();
       updateNetWorth();
+      updateCharts();
     }
 
     function updatePrices() {
       stocks.forEach(stock => {
-        prices[stock.name] = +(Math.random() * 100).toFixed(2);
+        const newPrice = +(Math.random() * 100).toFixed(2);
+        prices[stock.name] = newPrice;
+        // Update history (max 5 entries)
+        priceHistory[stock.name].push(newPrice);
+        if (priceHistory[stock.name].length > 5) priceHistory[stock.name].shift();
       });
     }
 
@@ -118,7 +139,7 @@
     function renderStocks() {
       const container = document.getElementById("stockContainer");
       container.innerHTML = "";
-      stocks.forEach(stock => {
+      stocks.forEach((stock, i) => {
         const holding = portfolio.holdings[stock.name] || { qty: 0, avg: 0 };
         const html = `
           <div class="bg-white/10 p-4 rounded-2xl shadow-xl">
@@ -126,6 +147,7 @@
             <p>Price: $${prices[stock.name]}</p>
             <p>Owned: ${holding.qty}</p>
             <p>Avg Buy: $${holding.avg.toFixed(2)}</p>
+            <canvas id="chart-${i}" class="stock-chart"></canvas>
             <div class="flex gap-2 mt-2">
               <button onclick="buy('${stock.name}')" class="bg-green-500 hover:bg-green-400 px-4 py-1 rounded-full">Buy</button>
               <button onclick="sell('${stock.name}')" class="bg-red-500 hover:bg-red-400 px-4 py-1 rounded-full">Sell</button>
@@ -133,6 +155,60 @@
           </div>
         `;
         container.innerHTML += html;
+      });
+    }
+
+    let charts = [];
+
+    function updateCharts() {
+      // Destroy old charts before recreating to avoid duplicates
+      charts.forEach(c => c.destroy());
+      charts = [];
+
+      stocks.forEach((stock, i) => {
+        const ctx = document.getElementById(`chart-${i}`).getContext('2d');
+        const data = priceHistory[stock.name];
+        const chart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: data.map((_, idx) => `Day ${day - data.length + 1 + idx}`),
+            datasets: [{
+              label: 'Price',
+              data,
+              borderColor: '#34d399', // teal-400
+              backgroundColor: 'rgba(52,211,153,0.3)',
+              tension: 0.3,
+              fill: true,
+              pointRadius: 2,
+              pointHoverRadius: 4,
+            }]
+          },
+          options: {
+            responsive: true,
+            animation: false,
+            scales: {
+              x: {
+                display: false,
+              },
+              y: {
+                beginAtZero: true,
+                max: 120,
+                ticks: {
+                  stepSize: 20,
+                  color: 'white'
+                },
+                grid: {
+                  color: 'rgba(255,255,255,0.1)'
+                }
+              }
+            },
+            plugins: {
+              legend: { display: false },
+              tooltip: { enabled: true }
+            }
+          }
+        });
+        charts.push(chart);
       });
     }
 
