@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cozy Stocks Game</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: monospace; }
+    .mythic { color: #f87171; animation: pulse 2s infinite; }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-sky-900 to-purple-900 text-white p-4">
+  <h1 id="dayTitle" class="text-3xl text-center font-bold mb-2"></h1>
+  <h2 id="netWorth" class="text-xl text-center mb-6"></h2>
+
+  <div id="stockContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8"></div>
+
+  <div class="flex justify-center">
+    <button onclick="nextDay()" class="bg-blue-600 hover:bg-blue-500 px-6 py-3 rounded-full text-lg">Next Day</button>
+  </div>
+
+  <script>
+    const dayNamePools = {
+      common: ["The Charts Were Mid", "Crabs Returned to Market", "Coffee-Fueled Trading", "A Slight Dip Occurred"],
+      rare: ["A Whale Sneezed Bitcoin", "Retail Frenzy Engaged", "Banana Futures Exploded", "The CEO Wore Crocs"],
+      epic: ["Blood Moon Over Nasdaq", "The Doomer Index Rose", "The Apes Ascended", "GME Was Whispered Again"],
+      legendary: ["Rektuary 6th: The Big Dump", "Infinite Margin Unlocked", "Buffet's Ghost Was Spotted", "The Sky Cried Tendies"],
+      mythic: ["Reality Was a Pump-and-Dump", "Day ∞ – The Eternal Bull", "Capitalism Became Sentient", "The Glitch Called “Buy”"]
+    };
+
+    const rarityClass = {
+      common: "text-gray-400",
+      rare: "text-blue-400",
+      epic: "text-purple-400",
+      legendary: "text-yellow-400",
+      mythic: "mythic"
+    };
+
+    const stocks = [
+      { name: "BananaCoin", emoji: "🍌" },
+      { name: "MemeBank", emoji: "📈" },
+      { name: "TendieCorp", emoji: "🐔" },
+      { name: "Moonshot Ltd", emoji: "🚀" },
+    ];
+
+    let day = 1;
+    let prices = {};
+    let portfolio = { cash: 1000, holdings: {} };
+
+    function getRandomDayName() {
+      const roll = Math.random();
+      let rarity = "common";
+      if (roll < 0.01) rarity = "mythic";
+      else if (roll < 0.05) rarity = "legendary";
+      else if (roll < 0.15) rarity = "epic";
+      else if (roll < 0.4) rarity = "rare";
+      const pool = dayNamePools[rarity];
+      const name = pool[Math.floor(Math.random() * pool.length)];
+      return { name, rarity };
+    }
+
+    function nextDay() {
+      day++;
+      updateDay();
+    }
+
+    function updateDay() {
+      const { name, rarity } = getRandomDayName();
+      document.getElementById("dayTitle").innerHTML = `Day ${day}: <span class="${rarityClass[rarity]}">${name}</span>`;
+      updatePrices();
+      renderStocks();
+      updateNetWorth();
+    }
+
+    function updatePrices() {
+      stocks.forEach(stock => {
+        prices[stock.name] = +(Math.random() * 100).toFixed(2);
+      });
+    }
+
+    function buy(stockName) {
+      const price = prices[stockName];
+      if (portfolio.cash >= price) {
+        const holding = portfolio.holdings[stockName] || { qty: 0, avg: 0 };
+        const totalCost = holding.qty * holding.avg + price;
+        const newQty = holding.qty + 1;
+        portfolio.holdings[stockName] = {
+          qty: newQty,
+          avg: totalCost / newQty
+        };
+        portfolio.cash -= price;
+        updateNetWorth();
+        renderStocks();
+      }
+    }
+
+    function sell(stockName) {
+      const holding = portfolio.holdings[stockName];
+      if (holding && holding.qty > 0) {
+        const price = prices[stockName];
+        portfolio.cash += price;
+        holding.qty -= 1;
+        if (holding.qty === 0) delete portfolio.holdings[stockName];
+        renderStocks();
+        updateNetWorth();
+      }
+    }
+
+    function updateNetWorth() {
+      let total = portfolio.cash;
+      for (let name in portfolio.holdings) {
+        total += portfolio.holdings[name].qty * prices[name];
+      }
+      document.getElementById("netWorth").textContent = `Net Worth: $${total.toFixed(2)} | Cash: $${portfolio.cash.toFixed(2)}`;
+    }
+
+    function renderStocks() {
+      const container = document.getElementById("stockContainer");
+      container.innerHTML = "";
+      stocks.forEach(stock => {
+        const holding = portfolio.holdings[stock.name] || { qty: 0, avg: 0 };
+        const html = `
+          <div class="bg-white/10 p-4 rounded-2xl shadow-xl">
+            <h3 class="text-xl font-bold">${stock.emoji} ${stock.name}</h3>
+            <p>Price: $${prices[stock.name]}</p>
+            <p>Owned: ${holding.qty}</p>
+            <p>Avg Buy: $${holding.avg.toFixed(2)}</p>
+            <div class="flex gap-2 mt-2">
+              <button onclick="buy('${stock.name}')" class="bg-green-500 hover:bg-green-400 px-4 py-1 rounded-full">Buy</button>
+              <button onclick="sell('${stock.name}')" class="bg-red-500 hover:bg-red-400 px-4 py-1 rounded-full">Sell</button>
+            </div>
+          </div>
+        `;
+        container.innerHTML += html;
+      });
+    }
+
+    updateDay();
+  </script>
+</body>
+</html>
