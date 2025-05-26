@@ -39,7 +39,7 @@ Welcome to **Cozy Stocks**, the low-stress browser-based stonks game with good v
 - Feel free to tweak the stock list or daily event flavor text in the code.
 - Want to add NFTs, crypto memes, or full-on plot arcs? Do it.
 - This is your cozy capitalism sandbox.
-- Give yoursekf infinite money and my motto is Stonksforever
+- The motto here is Stonksforever
 ---
 
 ## 🚀 Cheat Code
