@@ -7,7 +7,7 @@ Welcome to **Cozy Stocks**, the low-stress browser-based stonks game with good v
 ## 🎮 How to Play
 
 1. Open `index.html` in your browser.
-2. Each day, random events influence the market with chaotic flavor text.                                                                                                                                                                                                                          Stonksforever
+2. Each day, random events influence the market with chaotic flavor text.                                                                                                                                                                                     
 3. Click `Next Day` to refresh prices and advance the simulation.
 4. Buy low, sell high. Grow your net worth.
 5. Watch your stocks evolve with built-in mini charts.
@@ -39,7 +39,7 @@ Welcome to **Cozy Stocks**, the low-stress browser-based stonks game with good v
 - Feel free to tweak the stock list or daily event flavor text in the code.
 - Want to add NFTs, crypto memes, or full-on plot arcs? Do it.
 - This is your cozy capitalism sandbox.
-
+- Give yoursekf infinite money and my motto is Stonksforever
 ---
 
 ## 🚀 Cheat Code
@@ -48,7 +48,4 @@ Yes, there's a secret keyboard input.
 Yes, it makes you stupid rich.  
 
 
----
-
-## 📂 File Structure
 
